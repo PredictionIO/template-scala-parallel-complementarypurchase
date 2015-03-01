@@ -1,0 +1,20 @@
+{
+  "id": "default",
+  "description": "Default settings",
+  "engineFactory": "org.template.complimentarypurchase.ComplimentaryPurchaseEngine",
+  "datasource": {
+    "params" : {
+      "appId": 26
+    }
+  },
+  "algorithms": [
+    {
+      "name": "algo",
+      "params": {
+        "basketWindow" : 120,
+        "minSupport": 1,
+        "topNum": 10
+      }
+    }
+  ]
+}

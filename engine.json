@@ -12,8 +12,10 @@
       "name": "algo",
       "params": {
         "basketWindow" : 120,
-        "minSupport": 1,
-        "topNum": 10
+        "maxRuleLength" : 2,
+        "minSupport": 0.15,
+        "minConfidence": 0.5,
+        "minLift" : 1.0
       }
     }
   ]

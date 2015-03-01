@@ -11,29 +11,28 @@ import grizzled.slf4j.Logger
 
 case class AlgorithmParams(
   basketWindow: Int, // in seconds
-  minSupport: Int,
-  //threshold: Double,
-  //maxSupport: Int,
-  topNum: Int) extends Params
+  maxRuleLength: Int,
+  minSupport: Double,
+  minConfidence: Double,
+  minLift: Double
+  ) extends Params
 
 class Algorithm(val ap: AlgorithmParams)
-  // extends PAlgorithm if Model contains RDD[]
   extends P2LAlgorithm[PreparedData, Model, Query, PredictedResult] {
 
+  @transient lazy val maxCondLength = ap.maxRuleLength - 1
   @transient lazy val logger = Logger[this.type]
 
   def train(pd: PreparedData): Model = {
     val windowMillis = ap.basketWindow * 1000
-    // item Support
-    val itemSupport: Map[String, Int] = pd.buyEvents
-      .map(b => (b.item, 1))
-      .reduceByKey((a, b) => a + b)
-      .collectAsMap.toMap
+    require(ap.maxRuleLength >= 2,
+      s"maxRuleLength must be at least 2. Current: ${ap.maxRuleLength}.")
+    require((ap.minSupport >= 0 && ap.minSupport < 1),
+      s"minSupport must be >= 0 and < 1. Current: ${ap.minSupport}.")
+    require((ap.minConfidence >= 0 && ap.minConfidence < 1),
+      s"minSupport must be >= 0 and < 1. Current: ${ap.minSupport}.")
 
-    val totalItem = itemSupport.size
-    logger.info(s"itemSupport: ${itemSupport}. size ${totalItem}")
-
-    val set2Support: RDD[(Set[String], Int)] = pd.buyEvents
+    val transactions: RDD[Set[String]] = pd.buyEvents
       .map (b => (b.user, new ItemAndTime(b.item, b.t)))
       .groupByKey
       // create RDD[Set[String]] // size 2
@@ -41,7 +40,7 @@ class Algorithm(val ap: AlgorithmParams)
         // sort by time and create List[ItemSet] based on time and window
         val sortedList = iter.toList.sortBy(_.t)
         val init = ItemSet[String](Set(sortedList.head.item), sortedList.head.t)
-        val userItemSets = sortedList.tail
+        val basketList = sortedList.tail
           .foldLeft(List[ItemSet[String]](init)) ( (list, itemAndTime) =>
             // if current item time is within last item's time's window
             // add to same set.
@@ -50,57 +49,94 @@ class Algorithm(val ap: AlgorithmParams)
             else
               ItemSet(Set(itemAndTime.item), itemAndTime.t) :: list
           )
-          logger.info(s"user ${user}: ${userItemSets}.")
-          // TODO: filter ItemSet with size < 2
-        userItemSets.flatMap{ itemSet =>
-          itemSet.items.subsets(2).toList
-        }
+          logger.info(s"user ${user}: ${basketList}.")
+        basketList.map(_.items)
       }
-      // map to RDD[Set[T]]
-      .map { s => (s, 1) }
-      .reduceByKey((a, b) => a + b )
-      .filter{ case (set, support) => support >= ap.minSupport}
       .cache()
 
-    logger.info(s"setSupport: ${set2Support.collect.toList}")
+    val totalTransaction = transactions.count()
+    val minSupportCount = ap.minSupport * totalTransaction
 
-    val scores = set2Support
-      .flatMap { case (set, support) =>
-        val vec = set.toVector
-        val a = vec(0)
-        val b = vec(1)
-        val lift = support.toDouble * totalItem /
-          (itemSupport(a) * itemSupport(b))
-        Vector((a, (b, lift)), (b, (a, lift)))
+    logger.info(s"transactions: ${transactions.collect.toList}")
+    logger.info(s"totalTransaction: ${totalTransaction}")
+
+    /*val itemSupport: Map[String, Int] = totalTransaction
+      .flatMap(s => s.map(i => (i, 1)))
+      .reduceByKey((a, b) => a + b)
+      .filter(_._2 >= minSupportCount)
+    */
+
+    // generate item sets
+    val itemSets: RDD[Set[String]] = transactions
+      .flatMap { tran =>
+        (1 to ap.maxRuleLength).flatMap(n => tran.subsets(n))
       }
-      .groupByKey
-      .map { case (item, iter) => // iterable[(String, Double)]
-        val vec = iter.toVector
-          .sortBy(_._2)(Ordering.Double.reverse)
-          .take(ap.topNum)
-        (item, vec)
+
+    logger.info(s"itemSets: ${itemSets.cache().collect.toList}")
+
+    val itemSetCount: RDD[(Set[String], Int)] = itemSets.map(s => (s, 1))
+      .reduceByKey((a, b) => a + b)
+      .filter(_._2 >= minSupportCount)
+      .cache()
+
+    logger.info(s"itemSetCount: ${itemSetCount.collect.toList}")
+
+    val singleItemCount: RDD[(String, Int)] = itemSetCount
+      .filter { case (set, count) => set.size == 1}
+      .map{ case (set, count) => (set.head, count) }
+
+    val rules: RDD[(Set[String], RuleScore)] = itemSetCount
+      // a rule needs min set size >= 2
+      .filter{ case (set, count) => set.size >= 2}
+      .flatMap{ case (set, count) =>
+        set.map(i => (i, (set - i, count)))
       }
+      .join(singleItemCount)
+      .map { case (conseq, ((cond, ruleCnt), conseqCnt)) =>
+        (cond, (conseq, conseqCnt, ruleCnt))
+      }
+      .join(itemSetCount)
+      .map { case (cond, ((conseq, conseqCnt, ruleCnt), condCnt)) =>
+        val support = ruleCnt.toDouble / totalTransaction
+        val confidence = ruleCnt.toDouble / condCnt
+        val lift = (ruleCnt.toDouble / (condCnt * conseqCnt)) * totalTransaction
+        val ruleScore = RuleScore(
+          conseq = conseq,
+          support = support,
+          confidence = confidence,
+          lift = lift)
+        (cond, ruleScore)
+      }
+      .filter{ case (cond, rs) =>
+        (rs.confidence >= ap.minConfidence) && (rs.lift >= ap.minLift)
+      }
+
+    val sortedRules = rules.groupByKey
+      .mapValues(iter =>
+        iter.toVector.sortBy(_.lift)(Ordering.Double.reverse))
       .collectAsMap.toMap
 
-    new Model(scores) // TODO
+    new Model(sortedRules)
   }
 
   def predict(model: Model, query: Query): PredictedResult = {
-    val combined = query.items
-      .flatMap { i =>
-        model.scores.get(i).getOrElse{
-          logger.info(s"Item ${i} not found in model.")
-          Vector[(String, Double)]()
-        }
+    val conds = (1 to maxCondLength).flatMap(n => query.items.subsets(n))
+
+    val rules = conds.map { cond =>
+      model.rules.get(cond).map{ vec =>
+        val itemScores = vec.take(query.num).map { rs =>
+          new ItemScore(
+            item = rs.conseq,
+            support = rs.support,
+            confidence = rs.confidence,
+            lift = rs.lift
+          )
+        }.toArray
+        Rule(cond = cond, itemScores = itemScores)
       }
-      .groupBy(_._1)
-      // List if (String, Double)
-      .mapValues( list => list.map(t => t._2).reduce( (a, b) => a + b) )
-      .toArray
-      .sortBy(t => t._2)(Ordering.Double.reverse)
-      .take(query.num)
-      .map { case (k, v) => ItemScore(k, v) }
-    new PredictedResult(combined)
+    }.flatten.toArray
+
+    new PredictedResult(rules)
   }
 
   // item and time
@@ -120,8 +156,11 @@ class Algorithm(val ap: AlgorithmParams)
   }
 }
 
+case class RuleScore(
+  conseq: String, support: Double, confidence: Double, lift: Double)
+
 class Model(
-  val scores: Map[String, Vector[(String, Double)]]
+  val rules: Map[Set[String], Vector[RuleScore]]
 ) extends Serializable {
-  override def toString = s"scores: ${scores.size} ${scores.take(2)}..."
+  override def toString = s"rules: ${rules.size} ${rules.take(2)}..."
 }

@@ -1,5 +1,5 @@
 """
-Import sample data for lead score prediction engine
+Import sample data for complimentary purchase recommendation engine
 """
 
 import predictionio
@@ -31,11 +31,14 @@ def import_events(client):
   # plus 20 other items not in any set.
   other_items = ["i%s" % i for i in range(1, 20+1)]
 
+  # 3 popular item every one buy
+  pop_items = ["p%s" % i for i in range(1,3+1)]
+
   # each user have 5 basket purchases:
   for uid in user_ids:
     base_time = datetime(
       year = 2014,
-      month = 12,
+      month = 10,
       day = random.randint(1,31),
       hour = 15,
       minute = 39,
@@ -43,9 +46,26 @@ def import_events(client):
       microsecond = 618000,
       tzinfo = pytz.timezone('US/Pacific'))
     seconds = 0
-    for basket in range(0, 10):
-      #if (random.choice([True, False])):
-      buy_items = random.sample(other_items, random.randint(1, 3))
+    for basket in range(0, 5):
+      # may or may not some random item
+      if (random.choice([True, False])):
+        buy_items = random.sample(other_items, random.randint(1, 3))
+        for iid in buy_items:
+          event_time = base_time + timedelta(seconds=seconds, days=basket)
+          print "User", uid, "buys item", iid, "at", event_time
+          client.create_event(
+            event = "buy",
+            entity_type = "user",
+            entity_id = uid,
+            target_entity_type = "item",
+            target_entity_id = iid,
+            event_time = event_time
+          )
+          seconds += 10
+          count += 1
+
+      # always buy one popular item
+      buy_items = random.sample(pop_items, 1)
       for iid in buy_items:
         event_time = base_time + timedelta(seconds=seconds, days=basket)
         print "User", uid, "buys item", iid, "at", event_time
@@ -60,7 +80,7 @@ def import_events(client):
         seconds += 10
         count += 1
 
-      #if (random.choice([True, True, False])):
+      # always buy some something from one of the item set
       s = item_sets[random.choice(item_sets.keys())]
       buy_items = random.sample(s, random.randint(2, len(s)))
       for iid in buy_items:

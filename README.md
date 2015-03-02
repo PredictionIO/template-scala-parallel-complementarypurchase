@@ -3,7 +3,7 @@ Complimentary Purchase Recommendation Engine Template
 
 ## Documentation
 
-Please refer to http://docs.prediction.io/templates/ecommercerecommendation/quickstart/
+Please refer to http://docs.prediction.io/templates/complimentarypurchaserec/quickstart/
 
 ## Versions
 
@@ -11,6 +11,12 @@ Please refer to http://docs.prediction.io/templates/ecommercerecommendation/quic
 
 
 ## Development Notes
+
+### import sample data
+
+```
+$ python data/import_eventserver.py --access_key <your_access_key>
+```
 
 ### query
 

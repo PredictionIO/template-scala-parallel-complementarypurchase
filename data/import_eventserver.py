@@ -1,5 +1,5 @@
 """
-Import sample data for complimentary purchase recommendation engine
+Import sample data for complimentary purchase engine
 """
 
 import predictionio

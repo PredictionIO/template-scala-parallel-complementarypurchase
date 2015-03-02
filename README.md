@@ -1,9 +1,8 @@
-# template-scala-parallel-complimentary-purchase-rec
-Complimentary Purchase Recommendation Engine Template
+# Complimentary Purchase Engine Template
 
 ## Documentation
 
-Please refer to http://docs.prediction.io/templates/complimentarypurchaserec/quickstart/
+Please refer to http://docs.prediction.io/templates/complimentarypurchase/quickstart/
 
 ## Versions
 

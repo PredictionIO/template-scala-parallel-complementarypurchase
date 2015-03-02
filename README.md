@@ -27,7 +27,7 @@ http://localhost:8000/queries.json \
 ```
 curl -H "Content-Type: application/json" \
 -d '{
-  "items" : ["s2i1", "s2i3"],
+  "items" : ["s2i1", "s2i3", "s1i2"],
   "num" : 3 }' \
 http://localhost:8000/queries.json \
 -w %{time_total}

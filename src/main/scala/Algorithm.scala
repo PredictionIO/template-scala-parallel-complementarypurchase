@@ -14,7 +14,8 @@ case class AlgorithmParams(
   maxRuleLength: Int,
   minSupport: Double,
   minConfidence: Double,
-  minLift: Double
+  minLift: Double,
+  maxNumRulesPerCond: Int // max number of rules per condition
   ) extends Params
 
 class Algorithm(val ap: AlgorithmParams)
@@ -49,7 +50,7 @@ class Algorithm(val ap: AlgorithmParams)
             else
               ItemSet(Set(itemAndTime.item), itemAndTime.t) :: list
           )
-          logger.info(s"user ${user}: ${basketList}.")
+          logger.debug(s"user ${user}: ${basketList}.")
         basketList.map(_.items)
       }
       .cache()
@@ -57,14 +58,8 @@ class Algorithm(val ap: AlgorithmParams)
     val totalTransaction = transactions.count()
     val minSupportCount = ap.minSupport * totalTransaction
 
-    logger.info(s"transactions: ${transactions.collect.toList}")
+    logger.debug(s"transactions: ${transactions.collect.toList}")
     logger.info(s"totalTransaction: ${totalTransaction}")
-
-    /*val itemSupport: Map[String, Int] = totalTransaction
-      .flatMap(s => s.map(i => (i, 1)))
-      .reduceByKey((a, b) => a + b)
-      .filter(_._2 >= minSupportCount)
-    */
 
     // generate item sets
     val itemSets: RDD[Set[String]] = transactions
@@ -72,26 +67,22 @@ class Algorithm(val ap: AlgorithmParams)
         (1 to ap.maxRuleLength).flatMap(n => tran.subsets(n))
       }
 
-    logger.info(s"itemSets: ${itemSets.cache().collect.toList}")
+    logger.debug(s"itemSets: ${itemSets.cache().collect.toList}")
 
     val itemSetCount: RDD[(Set[String], Int)] = itemSets.map(s => (s, 1))
       .reduceByKey((a, b) => a + b)
       .filter(_._2 >= minSupportCount)
       .cache()
 
-    logger.info(s"itemSetCount: ${itemSetCount.collect.toList}")
-
-    val singleItemCount: RDD[(String, Int)] = itemSetCount
-      .filter { case (set, count) => set.size == 1}
-      .map{ case (set, count) => (set.head, count) }
+    logger.debug(s"itemSetCount: ${itemSetCount.collect.toList}")
 
     val rules: RDD[(Set[String], RuleScore)] = itemSetCount
       // a rule needs min set size >= 2
       .filter{ case (set, count) => set.size >= 2}
       .flatMap{ case (set, count) =>
-        set.map(i => (i, (set - i, count)))
+        set.map(i => (Set(i), (set - i, count)))
       }
-      .join(singleItemCount)
+      .join(itemSetCount)
       .map { case (conseq, ((cond, ruleCnt), conseqCnt)) =>
         (cond, (conseq, conseqCnt, ruleCnt))
       }
@@ -101,7 +92,7 @@ class Algorithm(val ap: AlgorithmParams)
         val confidence = ruleCnt.toDouble / condCnt
         val lift = (ruleCnt.toDouble / (condCnt * conseqCnt)) * totalTransaction
         val ruleScore = RuleScore(
-          conseq = conseq,
+          conseq = conseq.head, // single item consequence
           support = support,
           confidence = confidence,
           lift = lift)
@@ -113,7 +104,10 @@ class Algorithm(val ap: AlgorithmParams)
 
     val sortedRules = rules.groupByKey
       .mapValues(iter =>
-        iter.toVector.sortBy(_.lift)(Ordering.Double.reverse))
+        iter.toVector
+          .sortBy(_.lift)(Ordering.Double.reverse)
+          .take(ap.maxNumRulesPerCond)
+        )
       .collectAsMap.toMap
 
     new Model(sortedRules)

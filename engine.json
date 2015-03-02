@@ -13,9 +13,10 @@
       "params": {
         "basketWindow" : 120,
         "maxRuleLength" : 2,
-        "minSupport": 0.15,
-        "minConfidence": 0.5,
-        "minLift" : 1.0
+        "minSupport": 0.1,
+        "minConfidence": 0.6,
+        "minLift" : 1.0,
+        "maxNumRulesPerCond": 5
       }
     }
   ]

@@ -24,7 +24,7 @@ class Algorithm(val ap: AlgorithmParams)
   @transient lazy val maxCondLength = ap.maxRuleLength - 1
   @transient lazy val logger = Logger[this.type]
 
-  def train(pd: PreparedData): Model = {
+  def train(sc: SparkContext, pd: PreparedData): Model = {
     val windowMillis = ap.basketWindow * 1000
     require(ap.maxRuleLength >= 2,
       s"maxRuleLength must be at least 2. Current: ${ap.maxRuleLength}.")

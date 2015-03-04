@@ -6,8 +6,9 @@ Please refer to http://docs.prediction.io/templates/complimentarypurchase/quicks
 
 ## Versions
 
-### develop
+### v0.1.0
 
+- initial version (require PredictionIO >= 0.9.0)
 
 ## Development Notes
 
@@ -17,7 +18,7 @@ Please refer to http://docs.prediction.io/templates/complimentarypurchase/quicks
 $ python data/import_eventserver.py --access_key <your_access_key>
 ```
 
-### query
+### sample query
 
 ```
 $ curl -H "Content-Type: application/json" \

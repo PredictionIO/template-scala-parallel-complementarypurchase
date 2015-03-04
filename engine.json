@@ -1,0 +1,23 @@
+{
+  "id": "default",
+  "description": "Default settings",
+  "engineFactory": "org.template.complimentarypurchase.ComplimentaryPurchaseEngine",
+  "datasource": {
+    "params" : {
+      "appId": 26
+    }
+  },
+  "algorithms": [
+    {
+      "name": "algo",
+      "params": {
+        "basketWindow" : 120,
+        "maxRuleLength" : 2,
+        "minSupport": 0.1,
+        "minConfidence": 0.6,
+        "minLift" : 1.0,
+        "maxNumRulesPerCond": 5
+      }
+    }
+  ]
+}

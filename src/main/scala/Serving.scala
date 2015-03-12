@@ -1,4 +1,4 @@
-package org.template.complimentarypurchase
+package org.template.complementarypurchase
 
 import io.prediction.controller.LServing
 

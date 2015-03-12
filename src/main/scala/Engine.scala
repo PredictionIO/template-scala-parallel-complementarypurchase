@@ -1,4 +1,4 @@
-package org.template.complimentarypurchase
+package org.template.complementarypurchase
 
 import io.prediction.controller.IEngineFactory
 import io.prediction.controller.Engine
@@ -17,7 +17,7 @@ case class ItemScore(
   item: String, support: Double, confidence: Double, lift: Double
 ) extends Serializable
 
-object ComplimentaryPurchaseEngine extends IEngineFactory {
+object ComplementaryPurchaseEngine extends IEngineFactory {
   def apply() = {
     new Engine(
       classOf[DataSource],

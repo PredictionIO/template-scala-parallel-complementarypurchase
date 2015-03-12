@@ -2,7 +2,7 @@ import AssemblyKeys._
 
 assemblySettings
 
-name := "template-scala-parallel-complimentarypurchase"
+name := "template-scala-parallel-complementarypurchase"
 
 organization := "io.prediction"
 

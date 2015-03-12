@@ -1,10 +1,14 @@
-# Complimentary Purchase Engine Template
+# Complementary Purchase Engine Template
 
 ## Documentation
 
-Please refer to http://docs.prediction.io/templates/complimentarypurchase/quickstart/
+Please refer to http://docs.prediction.io/templates/complementarypurchase/quickstart/
 
 ## Versions
+
+### v0.1.1
+
+- Template name typo fix. Rename from "Complimentary" to "Complementary"
 
 ### v0.1.0
 

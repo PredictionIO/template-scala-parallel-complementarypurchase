@@ -1,7 +1,7 @@
 {
   "id": "default",
   "description": "Default settings",
-  "engineFactory": "org.template.complimentarypurchase.ComplimentaryPurchaseEngine",
+  "engineFactory": "org.template.complementarypurchase.ComplementaryPurchaseEngine",
   "datasource": {
     "params" : {
       "appId": 26

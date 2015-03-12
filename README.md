@@ -1,8 +1,8 @@
-# Complimentary Purchase Engine Template
+# Complementary Purchase Engine Template
 
 ## Documentation
 
-Please refer to http://docs.prediction.io/templates/complimentarypurchase/quickstart/
+Please refer to http://docs.prediction.io/templates/complementarypurchase/quickstart/
 
 ## Versions
 

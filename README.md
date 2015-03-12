@@ -6,6 +6,10 @@ Please refer to http://docs.prediction.io/templates/complementarypurchase/quicks
 
 ## Versions
 
+### v0.1.1
+
+- Template name typo fix. Rename from "Complimentary" to "Complementary"
+
 ### v0.1.0
 
 - initial version (require PredictionIO >= 0.9.0)

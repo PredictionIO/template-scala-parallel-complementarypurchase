@@ -51,7 +51,7 @@ class Algorithm(val ap: AlgorithmParams)
               ItemSet(Set(itemAndTime.item), itemAndTime.t) :: list
           )
           logger.debug(s"user ${user}: ${basketList}.")
-        basketList.map(_.items)
+        basketList.map(_.items).filter(_.size >= ap.minBasketSize)
       }
       .cache()
 

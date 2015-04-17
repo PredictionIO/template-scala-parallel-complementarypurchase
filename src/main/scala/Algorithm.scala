@@ -33,6 +33,8 @@ class Algorithm(val ap: AlgorithmParams)
       s"minSupport must be >= 0 and < 1. Current: ${ap.minSupport}.")
     require((ap.minConfidence >= 0 && ap.minConfidence < 1),
       s"minSupport must be >= 0 and < 1. Current: ${ap.minSupport}.")
+    require((ap.minBasketSize >= 2),
+      s"minBasketSize must be >= 2. Current: ${ap.minBasketSize}.")
 
     val transactions: RDD[Set[String]] = pd.buyEvents
       .map (b => (b.user, new ItemAndTime(b.item, b.t)))

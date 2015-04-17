@@ -15,6 +15,7 @@ case class AlgorithmParams(
   minSupport: Double,
   minConfidence: Double,
   minLift: Double,
+  minBasketSize: Int,
   maxNumRulesPerCond: Int // max number of rules per condition
   ) extends Params
 

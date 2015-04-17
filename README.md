@@ -6,6 +6,10 @@ Please refer to http://docs.prediction.io/templates/complementarypurchase/quicks
 
 ## Versions
 
+### v0.3.1
+
+- Add `minBasketSize` algorithm parameter.
+
 ### v0.3.0
 
 - update for PredictionIO 0.9.2, including:

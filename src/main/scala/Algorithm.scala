@@ -15,6 +15,7 @@ case class AlgorithmParams(
   minSupport: Double,
   minConfidence: Double,
   minLift: Double,
+  minBasketSize: Int,
   maxNumRulesPerCond: Int // max number of rules per condition
   ) extends Params
 
@@ -32,6 +33,8 @@ class Algorithm(val ap: AlgorithmParams)
       s"minSupport must be >= 0 and < 1. Current: ${ap.minSupport}.")
     require((ap.minConfidence >= 0 && ap.minConfidence < 1),
       s"minSupport must be >= 0 and < 1. Current: ${ap.minSupport}.")
+    require((ap.minBasketSize >= 2),
+      s"minBasketSize must be >= 2. Current: ${ap.minBasketSize}.")
 
     val transactions: RDD[Set[String]] = pd.buyEvents
       .map (b => (b.user, new ItemAndTime(b.item, b.t)))
@@ -51,7 +54,7 @@ class Algorithm(val ap: AlgorithmParams)
               ItemSet(Set(itemAndTime.item), itemAndTime.t) :: list
           )
           logger.debug(s"user ${user}: ${basketList}.")
-        basketList.map(_.items)
+        basketList.map(_.items).filter(_.size >= ap.minBasketSize)
       }
       .cache()
 

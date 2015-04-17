@@ -15,6 +15,7 @@ case class AlgorithmParams(
   minSupport: Double,
   minConfidence: Double,
   minLift: Double,
+  minBasketSize: Int,
   maxNumRulesPerCond: Int // max number of rules per condition
   ) extends Params
 
@@ -51,7 +52,7 @@ class Algorithm(val ap: AlgorithmParams)
               ItemSet(Set(itemAndTime.item), itemAndTime.t) :: list
           )
           logger.debug(s"user ${user}: ${basketList}.")
-        basketList.map(_.items)
+        basketList.map(_.items).filter(_.size >= ap.minBasketSize)
       }
       .cache()
 

@@ -6,6 +6,10 @@ Please refer to http://docs.prediction.io/templates/complementarypurchase/quicks
 
 ## Versions
 
+### v0.3.2
+
+- lower the default minSupport and minConfidence parameter setting
+
 ### v0.3.1
 
 - Add `minBasketSize` algorithm parameter.

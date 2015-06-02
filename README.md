@@ -6,6 +6,10 @@ Please refer to http://docs.prediction.io/templates/complementarypurchase/quicks
 
 ## Versions
 
+### v0.3.3
+
+- change to sort by confidence instead of lift score and change default parameter values
+
 ### v0.3.2
 
 - lower the default minSupport and minConfidence parameter setting

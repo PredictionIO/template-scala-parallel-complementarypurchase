@@ -108,7 +108,7 @@ class Algorithm(val ap: AlgorithmParams)
     val sortedRules = rules.groupByKey
       .mapValues(iter =>
         iter.toVector
-          .sortBy(_.lift)(Ordering.Double.reverse)
+          .sortBy(_.confidence)(Ordering.Double.reverse)
           .take(ap.maxNumRulesPerCond)
         )
       .collectAsMap.toMap

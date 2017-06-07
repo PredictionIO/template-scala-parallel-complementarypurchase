@@ -1,7 +1,7 @@
 package org.template.complementarypurchase
 
-import io.prediction.controller.IEngineFactory
-import io.prediction.controller.Engine
+import org.apache.predictionio.controller.EngineFactory
+import org.apache.predictionio.controller.Engine
 
 case class Query(items: Set[String], num: Int)
   extends Serializable
@@ -17,7 +17,7 @@ case class ItemScore(
   item: String, support: Double, confidence: Double, lift: Double
 ) extends Serializable
 
-object ComplementaryPurchaseEngine extends IEngineFactory {
+object ComplementaryPurchaseEngine extends EngineFactory {
   def apply() = {
     new Engine(
       classOf[DataSource],

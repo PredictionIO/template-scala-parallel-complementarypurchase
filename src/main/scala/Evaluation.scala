@@ -32,7 +32,7 @@ case class PrecisionAtK(k: Int, ratingThreshold: Double = 2.0)
 }
 object ComplementaryPurchaseEvaluation extends Evaluation {
   engineEvaluator = (
-    RecommendationEngine(),
+    ComplementaryPurchaseEngine(),
     MetricEvaluator(
       metric = PrecisionAtK(k = 10),
       otherMetrics = Seq(
@@ -49,7 +49,7 @@ object ComprehensiveRecommendationEvaluation extends Evaluation {
   val ks = Seq(1, 3, 10)
 
   engineEvaluator = (
-    RecommendationEngine(),
+    ComplementaryPurchaseEngine(),
     MetricEvaluator(
       metric = PrecisionAtK(k = 3)
       ))

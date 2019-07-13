@@ -58,9 +58,11 @@ class DataSource(val dsp: DataSourceParams)
      //ratings.cache
 
      (0 until kFold).map { idx => {
-       // I guess here we have to compare predicted with actual, but i dont know exactly how.
+
        // val trainingRatings = ratings.filter(_._2 % kFold != idx).map(_._1)  no ratings, so commented
        // val testingRatings = ratings.filter(_._2 % kFold == idx).map(_._1) no ratings, so commented
+
+       // I guess here we have to compare predicted with actual, but i dont know exactly how.
 
        // I think here should be the business logic, for that:
        // Quote Kenneth: instead of filter by high rating item,

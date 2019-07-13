@@ -10,7 +10,7 @@ import org.apache.predictionio.controller.OptionAverageMetric
 // $ pio eval org.template.complementarypurchase.ComplementaryPurchaseEvaluation \
 //   org.template.complementarypurchase.EngineParamsList
 
-case class PrecisionAtK(k: Int, ratingThreshold: Double = 2.0)
+case class PrecisionAtK(k: Int)
     extends OptionAverageMetric[EmptyEvaluationInfo, Query, PredictedResult, ActualResult] {
   require(k > 0, "k must be greater than 0")
 
@@ -18,7 +18,11 @@ case class PrecisionAtK(k: Int, ratingThreshold: Double = 2.0)
 
   override
   def calculate(q: Query, p: PredictedResult, a: ActualResult): Option[Double] = {
-    val positives: Set[String] = a.ratings.filter(_.rating >= ratingThreshold).map(_.item).toSet
+    //val positives: Set[String] = a.ratings.filter(_.rating >= ratingThreshold).map(_.item).toSet
+
+    //Here we should filter by items to find only the ones, which were bought
+    //together with the input item, but how should the syntax look like?
+    //val positives: Set[String] a.items,filter
 
     // If there is no positive results, Precision is undefined. We don't consider this case in the
     // metrics, hence we return None.
@@ -30,19 +34,16 @@ case class PrecisionAtK(k: Int, ratingThreshold: Double = 2.0)
     }
   }
 }
+
 object ComplementaryPurchaseEvaluation extends Evaluation {
   engineEvaluator = (
     ComplementaryPurchaseEngine(),
     MetricEvaluator(
-      metric = PrecisionAtK(k = 10),
-      otherMetrics = Seq(
-        PositiveCount(),
-        PrecisionAtK(k = 10),
-        PositiveCount(),
-        PrecisionAtK(k = 10),
-        PositiveCount()
-      )))
+      metric = PrecisionAtK(k = 10)
+    )
+  )
 }
+
 object ComprehensiveRecommendationEvaluation extends Evaluation {
 
   // val ratingThresholds = Seq(0.0, 2.0, 4.0)
@@ -52,8 +53,10 @@ object ComprehensiveRecommendationEvaluation extends Evaluation {
     ComplementaryPurchaseEngine(),
     MetricEvaluator(
       metric = PrecisionAtK(k = 3)
-      ))
+    )
+  )
 }
+
 trait BaseEngineParamsList extends EngineParamsGenerator {
   protected val baseEP = EngineParams(
     dataSourceParams = DataSourceParams(

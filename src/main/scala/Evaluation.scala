@@ -3,6 +3,9 @@ package org.template.complementarypurchase
 import org.apache.predictionio.controller.Evaluation
 import org.apache.predictionio.controller.EngineParamsGenerator
 import org.apache.predictionio.controller.EngineParams
+import org.apache.predictionio.controller.MetricEvaluator
+import org.apache.predictionio.controller.OptionAverageMetric
+
 // Usage:
 // $ pio eval org.template.complementarypurchase.ComplementaryPurchaseEvaluation \
 //   org.template.complementarypurchase.EngineParamsList

@@ -30,13 +30,13 @@ object ComplementaryPurchaseEvaluation extends Evaluation {
   engineEvaluator = (
     RecommendationEngine(),
     MetricEvaluator(
-      metric = PrecisionAtK(k = 10, ratingThreshold = 4.0),
+      metric = PrecisionAtK(k = 10),
       otherMetrics = Seq(
-        PositiveCount(ratingThreshold = 4.0),
-        PrecisionAtK(k = 10, ratingThreshold = 2.0),
-        PositiveCount(ratingThreshold = 2.0),
-        PrecisionAtK(k = 10, ratingThreshold = 1.0),
-        PositiveCount(ratingThreshold = 1.0)
+        PositiveCount(),
+        PrecisionAtK(k = 10),
+        PositiveCount(),
+        PrecisionAtK(k = 10),
+        PositiveCount()
       )))
 }
 trait BaseEngineParamsList extends EngineParamsGenerator {

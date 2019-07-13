@@ -4,7 +4,7 @@
   "engineFactory": "org.template.complementarypurchase.ComplementaryPurchaseEngine",
   "datasource": {
     "params" : {
-      "appName": "INVALID_APP_NAME"
+      "appName": "techselector_v3"
     }
   },
   "algorithms": [

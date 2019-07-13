@@ -1,5 +1,6 @@
 package org.template.complementarypurchase
 
+import org.apache.predictionio.controller.Evaluation
 import org.apache.predictionio.controller.EngineParamsGenerator
 import org.apache.predictionio.controller.EngineParams
 // Usage:
@@ -38,6 +39,17 @@ object ComplementaryPurchaseEvaluation extends Evaluation {
         PrecisionAtK(k = 10),
         PositiveCount()
       )))
+}
+object ComprehensiveRecommendationEvaluation extends Evaluation {
+
+  // val ratingThresholds = Seq(0.0, 2.0, 4.0)
+  val ks = Seq(1, 3, 10)
+
+  engineEvaluator = (
+    RecommendationEngine(),
+    MetricEvaluator(
+      metric = PrecisionAtK(k = 3)
+      ))
 }
 trait BaseEngineParamsList extends EngineParamsGenerator {
   protected val baseEP = EngineParams(

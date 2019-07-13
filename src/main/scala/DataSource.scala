@@ -57,12 +57,18 @@ override
 
     val kFold = evalParams.kFold
     // val ratings: RDD[(Rating, Long)] = getRatings(sc).zipWithUniqueId
-    ratings.cache
+    //ratings.cache
 
     (0 until kFold).map { idx => {
       // I guess here we have to compare predicted with actual, but i dont know exactly how.
       // val trainingRatings = ratings.filter(_._2 % kFold != idx).map(_._1)  no ratings, so commented
       // val testingRatings = ratings.filter(_._2 % kFold == idx).map(_._1) no ratings, so commented
+
+      // I think here should be the business logic, for that:
+      // Quote Kenneth: instead of filter by high rating item,
+      // as long as the items bought together given the input item,
+      //you treat it as positive actual results and compare with the predicted result.
+      // Not sure how to imlement this. Some hints?
 
       val testingUsers: RDD[(String, Iterable[Rating])] = testingRatings.groupBy(_.user)
 
